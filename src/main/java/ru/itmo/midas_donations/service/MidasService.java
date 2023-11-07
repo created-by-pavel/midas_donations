@@ -31,9 +31,9 @@ public class MidasService {
 
     public Donation addDonation(Long userFromId, Long userToId, String message, double amount, Long currencyId) {
         User userFrom = userRepository.findById(userFromId).orElseThrow(() ->
-                new MidasException("Пользователь с userId " + userFromId + " не найден"));
+                new MidasException("Пользователь с userId: " + userFromId + " не найден"));
         User userTo = userRepository.findById(userFromId).orElseThrow(() ->
-                new MidasException("Пользователь с userId " + userToId + " не найден"));
+                new MidasException("Пользователь с userId: " + userToId + " не найден"));
         Currency currency = currencyRepository.findById(currencyId).orElseThrow(() ->
                 new MidasException("Такой валюты нет"));
 

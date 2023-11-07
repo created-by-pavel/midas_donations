@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Table(name = "midas_user")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
