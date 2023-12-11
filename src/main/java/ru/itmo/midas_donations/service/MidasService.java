@@ -10,6 +10,7 @@ import ru.itmo.midas_donations.repository.CurrencyRepository;
 import ru.itmo.midas_donations.repository.DonationRepository;
 import ru.itmo.midas_donations.repository.UserRepository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class MidasService {
         }
     }
 
-    public Donation addDonation(Long userFromId, Long userToId, String message, double amount, Long currencyId) {
+    public Donation addDonation(Long userFromId, Long userToId, String message, BigDecimal amount, Long currencyId) {
         User userFrom = userRepository.findById(userFromId).orElseThrow(() ->
                 new MidasException("Пользователь с userId: " + userFromId + " не найден"));
         User userTo = userRepository.findById(userFromId).orElseThrow(() ->

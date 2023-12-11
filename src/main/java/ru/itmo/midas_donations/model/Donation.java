@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -32,5 +33,5 @@ public class Donation {
 
     private LocalDateTime date;
     private String message;
-    private double amount;
+    private BigDecimal amount;
 }

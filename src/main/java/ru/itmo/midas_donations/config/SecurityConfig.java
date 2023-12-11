@@ -19,9 +19,9 @@ public class SecurityConfig {
         return http
                 .authorizeHttpRequests(authorize -> {
                             authorize.requestMatchers(
-                                    //new AntPathRequestMatcher("/api/api-docs"),
-                                    //new AntPathRequestMatcher("/webjars/**"),
-                                    new AntPathRequestMatcher("/api/donations")
+                                    new AntPathRequestMatcher("/api/api-docs"),
+                                    new AntPathRequestMatcher("/webjars/**"),
+                                    new AntPathRequestMatcher("/api/**")
                             ).permitAll();
                             authorize.anyRequest().denyAll();
                         }
