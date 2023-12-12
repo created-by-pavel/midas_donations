@@ -3,18 +3,14 @@ package ru.itmo.midas_donations;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.postgresql.util.PSQLException;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import ru.itmo.midas_donations.dto.NewUser;
 import ru.itmo.midas_donations.exception.MidasException;
-import ru.itmo.midas_donations.model.Currency;
-import ru.itmo.midas_donations.model.Donation;
-import ru.itmo.midas_donations.model.User;
-import ru.itmo.midas_donations.repository.CurrencyRepository;
-import ru.itmo.midas_donations.repository.DonationRepository;
-import ru.itmo.midas_donations.repository.UserInfoRepository;
-import ru.itmo.midas_donations.repository.UserRepository;
-import ru.itmo.midas_donations.service.MidasService;
-import ru.itmo.midas_donations.service.UserService;
+import ru.itmo.midas_donations.model.*;
+import ru.itmo.midas_donations.repository.*;
+import ru.itmo.midas_donations.service.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -25,7 +21,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -68,12 +63,11 @@ class MidasDonationsApplicationTests {
     @Test
     void getDonations_UserDoesNotExist_ThrowsException() {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
-
         assertThrows(MidasException.class, () -> midasService.getDonations(1L));
     }
 
     @Test
-    void addDonation_ValidData_ReturnsSavedDonation() {
+    void addDonation() {
         User userFrom = new User(1L, "userFrom", null);
         User userTo = new User(2L, "userTo", null);
         Currency currency = new Currency(1L, "USD");
@@ -88,6 +82,19 @@ class MidasDonationsApplicationTests {
         Donation result = midasService.addDonation(userFrom.getId(), userTo.getId(), "Test Message", BigDecimal.TEN, currency.getId());
 
         assertEquals(expectedDonation, result);
+    }
+
+    @Test
+    void addDonation_UserToDoesNotExist_ThrowsException() {
+        Long userFromId = 1L;
+        Long userToId = 2L;
+        Long currencyId = 1L;
+
+        when(userRepository.findById(userFromId)).thenReturn(Optional.of(new User(1L, "userFrom", null)));
+        when(userRepository.findById(userToId)).thenReturn(Optional.empty());
+
+        assertThrows(MidasException.class, () ->
+                midasService.addDonation(userFromId, userToId, "Test Message", BigDecimal.TEN, currencyId));
     }
 
     @Test
@@ -106,4 +113,51 @@ class MidasDonationsApplicationTests {
         assertEquals(newUser.secondName(), savedUser.getUserInfo().getSecondName());
         assertEquals(newUser.age(), savedUser.getUserInfo().getAge());
     }
+
+    @Test
+    void saveUser_DuplicateName_ThrowsException() {
+        NewUser newUser = new NewUser("kaka123", 20, "John", "Smith");
+
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+            User savedUser = invocation.getArgument(0);
+            savedUser.setId(1L);
+            return savedUser;
+        });
+        User savedUser = userService.saveUser(newUser);
+        when(userRepository.save(any(User.class))).thenThrow(PSQLException.class);
+        assertThrows(PSQLException.class, () -> userService.saveUser(newUser));
+    }
+
+    @Test
+    void getUser_ValidId_ReturnsUser() {
+        User expectedUser = new User(1L, "kaka123", new UserInfo());
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(expectedUser));
+        User result = userService.getUser(1L);
+        assertEquals(expectedUser, result);
+    }
+
+    @Test
+    void getUser_InvalidId_ThrowsException() {
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(MidasException.class, () -> userService.getUser(1L));
+    }
+
+    @Test
+    void updateUser() {
+        Long userId = 1L;
+        NewUser newUser = new NewUser("newUsername", 25, "NewName", "NewSecondName");
+        User existingUser = new User(userId, "oldUsername", new UserInfo());
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        User updatedUser = userService.updateUser(userId, newUser);
+
+        assertEquals(newUser.preferredUsername(), updatedUser.getPreferredUsername());
+        assertEquals(newUser.name(), updatedUser.getUserInfo().getName());
+        assertEquals(newUser.secondName(), updatedUser.getUserInfo().getSecondName());
+        assertEquals(newUser.age(), updatedUser.getUserInfo().getAge());
+    }
+
 }

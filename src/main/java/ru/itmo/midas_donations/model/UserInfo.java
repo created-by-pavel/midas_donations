@@ -19,8 +19,4 @@ public class UserInfo {
     private String name;
     private String secondName;
     private Integer age;
-
-    @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private User user;
 }

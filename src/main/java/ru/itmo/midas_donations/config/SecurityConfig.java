@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -17,11 +19,14 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         return http
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .cors(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> {
                             authorize.requestMatchers(
-                                    new AntPathRequestMatcher("/api/api-docs"),
-                                    new AntPathRequestMatcher("/webjars/**"),
-                                    new AntPathRequestMatcher("/api/**")
+                                    new AntPathRequestMatcher("/currency/**"),
+                                    new AntPathRequestMatcher("/donations/**"),
+                                    new AntPathRequestMatcher("/users/**")
                             ).permitAll();
                             authorize.anyRequest().denyAll();
                         }

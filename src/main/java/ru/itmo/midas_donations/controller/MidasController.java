@@ -11,7 +11,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/donations")
+@RequestMapping("/donations")
 public class MidasController {
     private final MidasService midasService;
 
@@ -27,9 +27,9 @@ public class MidasController {
         return ResponseEntity.ok(donation);
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<Donation>> getDonationsByUser(@PathVariable Long userId) {
-        List<Donation> donations = midasService.getDonations(userId);
+    @GetMapping("/{id}")
+    public ResponseEntity<List<Donation>> getDonationsByUser(@PathVariable Long id) {
+        List<Donation> donations = midasService.getDonations(id);
 
         if (donations.isEmpty()) {
             return ResponseEntity.notFound().build();

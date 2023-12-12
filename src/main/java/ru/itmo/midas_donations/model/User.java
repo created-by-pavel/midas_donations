@@ -20,6 +20,7 @@ public class User {
     @Column(unique = true)
     private String preferredUsername;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "userInfo_id", referencedColumnName = "id")
     private UserInfo userInfo;
 }

@@ -14,5 +14,6 @@ public class Currency {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @Column(unique = true)
     private String name;
 }
